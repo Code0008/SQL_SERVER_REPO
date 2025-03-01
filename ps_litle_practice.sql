@@ -111,7 +111,7 @@ BEGIN
     inv.film_id as id_film,
     CASE 
 		WHEN count(fil.film_id)>10 THEN "EXCELENTE"
-        WHEN count(fil.film_id)<10 and count(fil.film_id)>5 THEN "POPULAR"
+        WHEN count(fil.film_id) BETWEEN 10 AND 5 THEN "POPULAR"
         WHEN count(fil.film_id)<5 THEN "POCOVISTA"
 	end as "condicion",
     fil.title
