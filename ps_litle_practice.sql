@@ -111,7 +111,7 @@ BEGIN
     inv.film_id as id_film,
     CASE 
 		WHEN count(fil.film_id)>10 THEN "EXCELENTE"
-        WHEN count(fil.film_id) BETWEEN 10 AND 5 THEN "POPULAR"
+        WHEN count(fil.film_id)<10 and count(fil.film_id)>5 THEN "POPULAR"
         WHEN count(fil.film_id)<5 THEN "POCOVISTA"
 	end as "condicion",
     fil.title
@@ -148,13 +148,55 @@ END
 -- select * from staff;
 -- select * from payment;
 DELIMITER //
-CREATE PROCEDURE MultiStoreCustomers()
+CREATE PROCEDURE CustomerSpendingLevel()
 BEGIN 
-
+	select 
+		cus.first_name,
+        cus.last_name,
+        sum(amount) as cantidad_gastada,
+        CASE 
+			WHEN sum(amount)>500 THEN "VIP"
+            WHEN sum(amount) between 500 and 200  THEN "Frecuente"
+            when sum(amount) BETWEEN 0 AND 200 then "Ocasional"
+		end as "Estado"
+    from customer cus
+    inner join payment pay
+    on pay.customer_id = cus.customer_id
+    group by cus.customer_id;
 END
 // DELIMITER ;
 
-select * from customer;
-select * from rental;
-select * from inventory;
-select * from store;
+
+-- select * from customer;
+-- select * from payment;
+
+
+DELIMITER //
+CREATE PROCEDURE TopProfitableCategories()
+BEGIN 
+	select 
+	cat.category_id,
+    cat.name as "categoria",
+    sum(pay.amount) as cantidad_recaudada
+    from  payment pay
+    inner join rental rent
+    on pay.rental_id = rent.rental_id
+    inner join inventory inv
+    on inv.inventory_id = rent.inventory_id
+    inner join film_category filca
+    on filca.film_id = inv.film_id
+    inner join category cat
+    on cat.category_id = filca.category_id
+    GROUP BY cat.category_id
+    HAVING cantidad_recaudada >1000
+    ORDER BY 3;
+END
+// DELIMITER ;
+
+-- select * from film_category;
+-- select * from category;
+-- select * from inventory;
+-- SELECT * FROM rental;
+-- select * from payment;
+
+
